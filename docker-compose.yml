@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  app:
+    container_name: slama-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
