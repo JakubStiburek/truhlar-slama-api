@@ -1,4 +1,4 @@
-import { Controller, Get, Logger } from '@nestjs/common';
+import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { ProductListDto } from '@/components/catalog/dto/product-list.dto';
 import { GetProductListPgOperation } from '@/components/catalog/infrastructure/operation/get-product-list-pg.operation';
@@ -25,6 +25,19 @@ export class CatalogController {
             result.unsafeCoerce().length,
             result.unsafeCoerce().map((product) => ProductListItemDto.fromEntity(product)),
         );
+    }
+
+    @Get('products/:code')
+    @ApiTags('catalog')
+    @ApiOkResponse({ type: ProductListDto })
+    async getProduct(@Param('code') code: string): Promise<ProductListItemDto> {
+        const result = await this.getProductsOperation.execute(code);
+
+        if (result.isLeft()) {
+            this.handleError(result.unsafeCoerce());
+        }
+
+        return ProductListItemDto.fromEntity(result.unsafeCoerce()[0]);
     }
 
     private handleError(error: Error): void {
