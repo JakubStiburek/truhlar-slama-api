@@ -40,11 +40,11 @@ export class ProductListItemDto {
     static fromEntity(entity: Product): ProductListItemDto {
         return new ProductListItemDto(
             entity.id,
-            entity.title,
-            entity.description,
-            entity.price,
-            entity.amount,
-            entity.code,
+            entity.props.title,
+            entity.props.description,
+            entity.props.price,
+            entity.props.amount,
+            entity.props.code,
             entity.images,
         );
     }

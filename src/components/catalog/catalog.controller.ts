@@ -13,7 +13,7 @@ import { ProductListDto } from '@/components/catalog/dto/product-list.dto';
 import { GetProductListPgOperation } from '@/components/catalog/infrastructure/operation/get-product-list-pg.operation';
 import { ProductListItemDto } from '@/components/catalog/dto/product-list-item.dto';
 import { ValidateApiKeyService } from '@/shared/service/validate-api-key.service';
-import { InvalidApiKeyException } from '@/components/catalog/domain/invalid-api-key.exception';
+import { InvalidApiKeyException } from '@/components/catalog/domain/exception/invalid-api-key.exception';
 
 @ApiBearerAuth('jwt')
 @Controller()

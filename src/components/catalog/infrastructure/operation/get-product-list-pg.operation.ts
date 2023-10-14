@@ -2,6 +2,7 @@ import { Inject } from '@nestjs/common';
 import { DbService } from '@/shared/postgres/db.service';
 import { Either, Left, Right } from 'purify-ts';
 import { Product } from '@/components/catalog/domain/product.entity';
+import { ProductProps } from '@/components/catalog/domain/product-props.vo';
 
 interface ProductPg {
     id: number;
@@ -45,11 +46,7 @@ export class GetProductListPgOperation {
                 const productImages = images.filter((image) => image.product_id === product.id);
                 return new Product(
                     product.id,
-                    product.title,
-                    product.description,
-                    product.price,
-                    product.amount,
-                    product.code,
+                    new ProductProps(product.title, product.description, product.price, product.amount, product.code),
                     productImages,
                 );
             });
