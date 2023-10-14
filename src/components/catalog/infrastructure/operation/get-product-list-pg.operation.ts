@@ -53,7 +53,6 @@ export class GetProductListPgOperation {
 
             return Right(productsWithImages);
         } catch (error) {
-            console.error(error);
             return Left(new Error('Error getting product list'));
         }
     }
