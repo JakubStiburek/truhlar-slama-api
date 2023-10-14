@@ -1,20 +1,40 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+    Controller,
+    ForbiddenException,
+    Get,
+    Inject,
+    InternalServerErrorException,
+    Logger,
+    Param,
+    Query,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProductListDto } from '@/components/catalog/dto/product-list.dto';
 import { GetProductListPgOperation } from '@/components/catalog/infrastructure/operation/get-product-list-pg.operation';
 import { ProductListItemDto } from '@/components/catalog/dto/product-list-item.dto';
+import { ValidateApiKeyService } from '@/shared/service/validate-api-key.service';
+import { InvalidApiKeyException } from '@/components/catalog/domain/invalid-api-key.exception';
 
 @ApiBearerAuth('jwt')
 @Controller()
 export class CatalogController {
     private logger = new Logger(`CatalogController`);
 
-    constructor(private readonly getProductsOperation: GetProductListPgOperation) {}
+    constructor(
+        private readonly getProductsOperation: GetProductListPgOperation,
+        @Inject(ValidateApiKeyService)
+        private apiKeyService: ValidateApiKeyService,
+    ) {}
 
     @Get('products')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductListDto })
-    async getProducts(): Promise<ProductListDto> {
+    @ApiQuery({ name: 'key', required: false })
+    async getProducts(@Query('key') key: string): Promise<ProductListDto> {
+        if (!this.apiKeyService.validate(key)) {
+            this.handleError(new InvalidApiKeyException());
+        }
+
         const result = await this.getProductsOperation.execute();
 
         if (result.isLeft()) {
@@ -30,7 +50,12 @@ export class CatalogController {
     @Get('products/:code')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductListDto })
-    async getProduct(@Param('code') code: string): Promise<ProductListItemDto> {
+    @ApiQuery({ name: 'key', required: false })
+    async getProduct(@Param('code') code: string, @Query('key') key: string): Promise<ProductListItemDto> {
+        if (!this.apiKeyService.validate(key)) {
+            this.handleError(new InvalidApiKeyException());
+        }
+
         const result = await this.getProductsOperation.execute(code);
 
         if (result.isLeft()) {
@@ -42,6 +67,11 @@ export class CatalogController {
 
     private handleError(error: Error): void {
         this.logger.error(error.message, error.stack);
-        throw error;
+
+        if (error instanceof InvalidApiKeyException) {
+            throw new ForbiddenException();
+        }
+
+        throw new InternalServerErrorException();
     }
 }
