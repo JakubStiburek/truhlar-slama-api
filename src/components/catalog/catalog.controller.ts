@@ -10,8 +10,9 @@ import {
     Param,
     Post,
     Query,
+    UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProductListDto } from '@/components/catalog/dto/product-list.dto';
 import { GetProductListPgOperation } from '@/components/catalog/infrastructure/operation/get-product-list-pg.operation';
 import { ProductListItemDto } from '@/components/catalog/dto/product-list-item.dto';
@@ -23,8 +24,8 @@ import { ProductCodeDto } from '@/components/catalog/dto/product-code.dto';
 import { ProductPropsDto } from '@/components/catalog/dto/product-props.dto';
 import { ProductCode } from '@/components/catalog/domain/product-codoe.vo';
 import { InvalidProductCodeProvidedException } from '@/components/catalog/domain/exception/invalid-product-code-provided.exception';
+import { LocalAuthGuard } from '@/components/auth/local-auth.guard';
 
-@ApiBearerAuth('jwt')
 @Controller()
 export class CatalogController {
     private logger = new Logger(`CatalogController`);
@@ -36,6 +37,7 @@ export class CatalogController {
         private apiKeyService: ValidateApiKeyService,
     ) {}
 
+    @UseGuards(LocalAuthGuard)
     @Get('products')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductListDto })
