@@ -10,7 +10,6 @@ import {
     Param,
     Post,
     Query,
-    UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProductListDto } from '@/components/catalog/dto/product-list.dto';
@@ -24,7 +23,6 @@ import { ProductCodeDto } from '@/components/catalog/dto/product-code.dto';
 import { ProductPropsDto } from '@/components/catalog/dto/product-props.dto';
 import { ProductCode } from '@/components/catalog/domain/product-codoe.vo';
 import { InvalidProductCodeProvidedException } from '@/components/catalog/domain/exception/invalid-product-code-provided.exception';
-import { LocalAuthGuard } from '@/components/auth/local-auth.guard';
 
 @Controller()
 export class CatalogController {
@@ -37,8 +35,7 @@ export class CatalogController {
         private apiKeyService: ValidateApiKeyService,
     ) {}
 
-    @UseGuards(LocalAuthGuard)
-    @Get('products')
+    @Get('api/v1/products')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductListDto })
     @ApiQuery({ name: 'key', required: false })
@@ -59,7 +56,7 @@ export class CatalogController {
         );
     }
 
-    @Get('products/:code')
+    @Get('api/v1/products/:code')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductListDto })
     @ApiQuery({ name: 'key', required: false })
@@ -77,7 +74,7 @@ export class CatalogController {
         return ProductListItemDto.fromEntity(result.unsafeCoerce()[0]);
     }
 
-    @Post('products')
+    @Post('api/v1/protected/products')
     @ApiTags('catalog')
     @ApiOkResponse({ type: ProductCodeDto })
     @ApiBody({ type: ProductPropsDto })
